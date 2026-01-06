@@ -349,27 +349,25 @@
 
     if (a.val === 0) return `y = ${q}`;
 
-    // 反比例：分子は整数、マイナスは棒の外（分母側）へ
-    if (mode === 'inv'){
-      const num = Math.abs(Math.trunc(a.val)); // 整数のみ
-      let denom = (p === 0) ? 'x' : `(x ${p > 0 ? '-' : '+'} ${Math.abs(p)})`;
+   // 反比例：分子は整数、マイナスは分数の左（棒の外）へ
+if (mode === 'inv'){
+  const num = Math.abs(Math.trunc(a.val)); // 整数のみ
+  const denom = (p === 0) ? 'x' : `(x ${p > 0 ? '-' : '+'} ${Math.abs(p)})`;
 
-      if (a.val < 0){
-        // 例：(-5)/x ではなく 5/(-x) 形式
-        denom = (p === 0) ? `-x` : `-${denom}`; // -(x-3) など
-      }
+  const signHtml = (a.val < 0) ? '<span class="operator">-</span>' : '';
 
-      let html = `y = <div class="fraction">
-                    <span class="fraction-top">${num}</span>
-                    <span class="fraction-bottom">${denom}</span>
-                  </div>`;
+  let html = `y = ${signHtml}<div class="fraction">
+                <span class="fraction-top">${num}</span>
+                <span class="fraction-bottom">${denom}</span>
+              </div>`;
 
-      if (q !== 0){
-        const op = q > 0 ? '+' : '-';
-        html += `<span class="operator">${op}</span>${Math.abs(q)}`;
-      }
-      return html;
-    }
+  if (q !== 0){
+    const op = q > 0 ? '+' : '-';
+    html += `<span class="operator">${op}</span>${Math.abs(q)}`;
+  }
+  return html;
+}
+
 
     // 多項式
     let html = `y = `;
