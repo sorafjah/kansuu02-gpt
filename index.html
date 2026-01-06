@@ -1,763 +1,701 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>多項式関数グラフ・シミュレーター V2.6</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>多項式関数グラフ・シミュレーター V2.7</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap');
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Roboto+Mono:wght@500&display=swap');
 
-        body {
-            font-family: 'Noto Sans JP', sans-serif;
-            background-color: #f8fafc;
-            color: #1e293b;
-        }
+    body { font-family: 'Noto Sans JP', sans-serif; background-color:#f8fafc; color:#1e293b; }
 
-        .math-display {
-            font-family: 'Times New Roman', 'Roboto Mono', serif;
-            font-style: italic;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 80px;
-            flex-wrap: wrap;
-        }
+    .math-display{
+      font-family:'Times New Roman','Roboto Mono',serif;
+      font-style:italic;
+      font-size:1.8rem;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:80px;
+      flex-wrap:wrap;
+    }
 
-        /* 数式内の分数スタイル */
-        .fraction {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: center;
-            vertical-align: middle;
-            margin: 0 4px;
-            font-style: normal;
-        }
-        .fraction-top {
-            border-bottom: 2px solid #000;
-            padding: 0 4px;
-            line-height: 1.2;
-            font-size: 0.9em;
-        }
-        .fraction-bottom {
-            padding: 0 4px;
-            line-height: 1.2;
-            font-size: 0.9em;
-        }
-        .operator {
-            margin: 0 6px;
-            font-style: normal;
-        }
+    .fraction{
+      display:inline-flex;
+      flex-direction:column;
+      align-items:center;
+      vertical-align:middle;
+      margin:0 4px;
+      font-style:normal;
+    }
+    .fraction-top{
+      border-bottom:2px solid #000;
+      padding:0 4px;
+      line-height:1.2;
+      font-size:0.9em;
+    }
+    .fraction-bottom{
+      padding:0 4px;
+      line-height:1.2;
+      font-size:0.9em;
+    }
+    .operator{ margin:0 6px; font-style:normal; }
 
-        /* スライダーのカスタマイズ */
-        input[type=range] {
-            accent-color: #3b82f6;
-            height: 6px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 20px;
-            width: 20px;
-            background: #ffffff;
-            border: 2px solid currentColor;
-            border-radius: 50%;
-            cursor: pointer;
-            margin-top: -7px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            height: 6px;
-            border-radius: 3px;
-        }
+    input[type=range]{ accent-color:#3b82f6; height:6px; }
+    input[type=range]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      height:20px;width:20px;background:#fff;border:2px solid currentColor;border-radius:50%;
+      cursor:pointer;margin-top:-7px;box-shadow:0 2px 4px rgba(0,0,0,0.1);
+    }
+    input[type=range]::-webkit-slider-runnable-track{ height:6px;border-radius:3px; }
 
-        /* コントロールパネルのラベル */
-        .control-row {
-            transition: background-color 0.2s;
-        }
-        .control-row:hover {
-            background-color: #f1f5f9;
-        }
+    .control-row{ transition:background-color .2s; }
+    .control-row:hover{ background-color:#f1f5f9; }
 
-        /* 解説セクションのスタイル */
-        .explanation-card {
-            border-left: 4px solid #3b82f6;
-        }
-    </style>
+    .explanation-card{ border-left:4px solid #3b82f6; }
+  </style>
 </head>
+
 <body class="pb-12">
+  <div class="max-w-4xl mx-auto p-4">
+    <header class="text-center mb-8 pt-4">
+      <h1 class="text-3xl font-bold text-slate-700 tracking-tight">
+        多項式関数グラフ・シミュレーター <span class="text-blue-500 text-lg align-top">Ver.2.7</span>
+      </h1>
+      <p class="text-slate-500 mt-2">係数と平行移動を操作して、グラフの幾何学的な変化を観察しよう</p>
+    </header>
 
-    <div class="max-w-4xl mx-auto p-4">
-        <!-- Header -->
-        <header class="text-center mb-8 pt-4">
-            <h1 class="text-3xl font-bold text-slate-700 tracking-tight">多項式関数グラフ・シミュレーター <span class="text-blue-500 text-lg align-top">Ver.2.6</span></h1>
-            <p class="text-slate-500 mt-2">係数と平行移動を操作して、グラフの幾何学的な変化を観察しよう</p>
-        </header>
-
-        <!-- Function Selector Tabs -->
-        <div class="flex justify-center flex-wrap gap-2 mb-6">
-            <button onclick="setFunction(1)" class="tab-btn active px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="poly1">
-                1次関数 (直線)
-            </button>
-            <button onclick="setFunction(2)" class="tab-btn px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="poly2">
-                2次関数 (放物線)
-            </button>
-            <button onclick="setFunction(3)" class="tab-btn px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="poly3">
-                3次関数
-            </button>
-            <button onclick="setFunction('inv')" class="tab-btn px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="inv">
-                分数関数 (反比例)
-            </button>
-        </div>
-
-        <!-- Main Display & Controls -->
-        <div class="grid md:grid-cols-12 gap-6 mb-8">
-
-            <!-- Left Column: Controls -->
-            <div class="md:col-span-5 space-y-4">
-
-                <!-- Equation Display -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-center items-center min-h-[120px]">
-                    <div id="equation-display" class="math-display text-slate-800">
-                        y = x²
-                    </div>
-                </div>
-
-                <!-- Sliders Panel -->
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
-
-                    <!-- Controls Header -->
-                    <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Parameters</span>
-                        <button onclick="resetParams()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded transition-colors flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/></svg>
-                            リセット
-                        </button>
-                    </div>
-
-                    <!-- Slider a -->
-                    <div class="control-row rounded-lg p-2 -mx-2">
-                        <div class="flex justify-between mb-1">
-                            <label class="font-bold text-blue-600 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded bg-blue-100 flex items-center justify-center text-sm">a</span>
-                                <span class="text-xs text-slate-500 font-normal">開き具合 / 傾き / 大きさ</span>
-                            </label>
-                            <span id="val-a" class="font-mono font-bold text-slate-700">1</span>
-                        </div>
-                        <input type="range" id="slider-a" class="w-full text-blue-600">
-                    </div>
-
-                    <!-- Slider p -->
-                    <div class="control-row rounded-lg p-2 -mx-2">
-                        <div class="flex justify-between mb-1">
-                            <label class="font-bold text-red-500 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded bg-red-100 flex items-center justify-center text-sm">p</span>
-                                <span class="text-xs text-slate-500 font-normal">左右の移動 (x軸)</span>
-                            </label>
-                            <span id="val-p" class="font-mono font-bold text-slate-700">0</span>
-                        </div>
-                        <input type="range" id="slider-p" min="-10" max="10" step="1" value="0" class="w-full text-red-500">
-                    </div>
-
-                    <!-- Slider q -->
-                    <div class="control-row rounded-lg p-2 -mx-2">
-                        <div class="flex justify-between mb-1">
-                            <label class="font-bold text-green-600 flex items-center gap-2">
-                                <span class="w-6 h-6 rounded bg-green-100 flex items-center justify-center text-sm">q</span>
-                                <span class="text-xs text-slate-500 font-normal">上下の移動 (y軸)</span>
-                            </label>
-                            <span id="val-q" class="font-mono font-bold text-slate-700">0</span>
-                        </div>
-                        <input type="range" id="slider-q" min="-10" max="10" step="1" value="0" class="w-full text-green-600">
-                    </div>
-
-                    <!-- Options -->
-                    <div class="pt-4 border-t border-slate-100">
-                        <label class="flex items-center space-x-3 cursor-pointer group">
-                            <div class="relative">
-                                <input type="checkbox" id="check-ghost" class="sr-only peer">
-                                <div class="w-10 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-500 peer-focus:ring-2 peer-focus:ring-indigo-300 transition-colors"></div>
-                                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
-                            </div>
-                            <span class="text-sm text-slate-600 group-hover:text-slate-800 transition-colors">操作前のグラフを残す (比較)</span>
-                        </label>
-                    </div>
-
-                </div>
-            </div>
-
-            <!-- Right Column: Graph -->
-            <div class="md:col-span-7">
-                <div class="bg-white p-2 rounded-xl shadow-md border border-slate-200 relative h-full min-h-[400px]">
-                    <!-- 凡例エリア（高さを文字に合わせる） -->
-                    <div class="absolute top-4 right-4 z-10 bg-white/95 backdrop-blur px-2 py-[2px] rounded border border-slate-100 shadow-sm text-[10px] text-slate-500 flex flex-col gap-0 leading-none">
-                        <div id="point-legend-row" class="flex items-center gap-1.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
-                            <span id="point-legend-label" class="whitespace-nowrap">頂点 (p, q)</span>
-                        </div>
-                        <div id="ghost-legend" class="flex items-center gap-1.5 opacity-0 transition-opacity duration-300">
-                            <span class="w-2.5 h-0.5 bg-slate-300 rounded-full flex-shrink-0"></span>
-                            <span class="whitespace-nowrap">操作前の位置</span>
-                        </div>
-                    </div>
-                    <canvas id="graphCanvas"></canvas>
-                </div>
-            </div>
-        </div>
-
-        <!-- Explanation Section -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
-            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                <h2 class="font-bold text-slate-700">数学的ポイントの解説</h2>
-            </div>
-
-            <div class="p-6 grid md:grid-cols-3 gap-6">
-                <!-- Point 1 -->
-                <div class="explanation-card pl-4">
-                    <h3 class="font-bold text-slate-800 mb-2 text-sm">係数 <span class="font-math italic text-blue-600">a</span> の役割</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        グラフの「形」を決定します。<br>
-                        <strong class="text-slate-800">絶対値の大きさ</strong>：値が大きいほどグラフは細く（急に）なり、0に近いほど緩やかになります。<br>
-                        <strong class="text-slate-800">符号 (+/-)</strong>：プラスなら「右上がり」または「下に凸」、マイナスなら「右下がり」または「上に凸」と向きが逆転します。
-                    </p>
-                </div>
-
-                <!-- Point 2 -->
-                <div class="explanation-card pl-4" style="border-color: #ef4444;">
-                    <h3 class="font-bold text-slate-800 mb-2 text-sm">定数 <span class="font-math italic text-red-500">p</span> (x軸方向)</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        グラフを<strong class="text-slate-800">左右に平行移動</strong>します。<br>
-                        数式では (x - p) と引き算の形になることに注意！<br>
-                        例えば p = 3 のとき、式は (x - 3) となり、グラフは<strong class="text-red-500">右に3</strong>動きます。p = -3 なら左へ動きます。
-                    </p>
-                </div>
-
-                <!-- Point 3 -->
-                <div class="explanation-card pl-4" style="border-color: #16a34a;">
-                    <h3 class="font-bold text-slate-800 mb-2 text-sm">定数 <span class="font-math italic text-green-600">q</span> (y軸方向)</h3>
-                    <p class="text-sm text-slate-600 leading-relaxed">
-                        グラフを<strong class="text-slate-800">上下に平行移動</strong>します。<br>
-                        q がプラスなら<strong class="text-green-600">上</strong>へ、マイナスなら下へグラフ全体が移動します。<br>
-                        点 (p, q) は、2次関数なら「頂点」、3次関数なら「変曲点」、反比例なら「漸近線の交点（中心）」という重要な位置になります。
-                    </p>
-                </div>
-            </div>
-
-            <!-- Dynamic Footer Note -->
-            <div class="bg-indigo-50 px-6 py-3 border-t border-indigo-100 text-sm text-indigo-800">
-                <span class="font-bold mr-2">現在の関数:</span>
-                <span id="current-func-desc">2次関数は放物線です。点 (p,q) は「頂点」です。</span>
-            </div>
-        </div>
-
-        <footer class="text-center text-slate-400 text-xs pb-4">
-            <p>© 2024 Math Graph Simulator Ver.2.6</p>
-        </footer>
+    <!-- Tabs -->
+    <div class="flex justify-center flex-wrap gap-2 mb-6">
+      <button onclick="setFunction(1)" class="tab-btn active px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="poly1">
+        1次関数 (直線)
+      </button>
+      <button onclick="setFunction(2)" class="tab-btn px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="poly2">
+        2次関数 (放物線)
+      </button>
+      <button onclick="setFunction(3)" class="tab-btn px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="poly3">
+        3次関数
+      </button>
+      <button onclick="setFunction('inv')" class="tab-btn px-5 py-2.5 border rounded-full text-sm font-bold transition-all duration-200 hover:shadow-md border-slate-200 bg-white text-slate-600 shadow-sm" data-key="inv">
+        分数関数 (反比例)
+      </button>
     </div>
 
-    <script>
-        // --- ユーティリティ: 最大公約数 ---
-        function gcd(a, b) {
-            return b === 0 ? a : gcd(b, a % b);
+    <div class="grid md:grid-cols-12 gap-6 mb-8">
+      <!-- Controls -->
+      <div class="md:col-span-5 space-y-4">
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col justify-center items-center min-h-[120px]">
+          <div id="equation-display" class="math-display text-slate-800">y = x²</div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-6">
+          <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Parameters</span>
+            <button onclick="resetParams()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1 rounded transition-colors flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/></svg>
+              リセット
+            </button>
+          </div>
+
+          <div class="control-row rounded-lg p-2 -mx-2">
+            <div class="flex justify-between mb-1">
+              <label class="font-bold text-blue-600 flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-blue-100 flex items-center justify-center text-sm">a</span>
+                <span class="text-xs text-slate-500 font-normal">開き具合 / 傾き / 大きさ</span>
+              </label>
+              <span id="val-a" class="font-mono font-bold text-slate-700">1</span>
+            </div>
+            <input type="range" id="slider-a" class="w-full text-blue-600">
+          </div>
+
+          <div class="control-row rounded-lg p-2 -mx-2">
+            <div class="flex justify-between mb-1">
+              <label class="font-bold text-red-500 flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-red-100 flex items-center justify-center text-sm">p</span>
+                <span class="text-xs text-slate-500 font-normal">左右の移動 (x軸)</span>
+              </label>
+              <span id="val-p" class="font-mono font-bold text-slate-700">0</span>
+            </div>
+            <input type="range" id="slider-p" min="-10" max="10" step="1" value="0" class="w-full text-red-500">
+          </div>
+
+          <div class="control-row rounded-lg p-2 -mx-2">
+            <div class="flex justify-between mb-1">
+              <label class="font-bold text-green-600 flex items-center gap-2">
+                <span class="w-6 h-6 rounded bg-green-100 flex items-center justify-center text-sm">q</span>
+                <span class="text-xs text-slate-500 font-normal">上下の移動 (y軸)</span>
+              </label>
+              <span id="val-q" class="font-mono font-bold text-slate-700">0</span>
+            </div>
+            <input type="range" id="slider-q" min="-10" max="10" step="1" value="0" class="w-full text-green-600">
+          </div>
+
+          <div class="pt-4 border-t border-slate-100">
+            <label class="flex items-center space-x-3 cursor-pointer group">
+              <div class="relative">
+                <input type="checkbox" id="check-ghost" class="sr-only peer">
+                <div class="w-10 h-6 bg-slate-200 rounded-full peer peer-checked:bg-indigo-500 peer-focus:ring-2 peer-focus:ring-indigo-300 transition-colors"></div>
+                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform peer-checked:translate-x-4"></div>
+              </div>
+              <span class="text-sm text-slate-600 group-hover:text-slate-800 transition-colors">操作前のグラフを残す (比較)</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Graph -->
+      <div class="md:col-span-7">
+        <div class="bg-white p-2 rounded-xl shadow-md border border-slate-200 relative h-full min-h-[400px]">
+          <!-- Legend (高さを文字に合わせる) -->
+          <div class="absolute top-4 right-4 z-10 bg-white/95 backdrop-blur px-2 py-[2px] rounded border border-slate-100 shadow-sm text-[10px] text-slate-500 flex flex-col gap-0 leading-none">
+            <div id="point-legend-row" class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-500 flex-shrink-0"></span>
+              <span id="point-legend-label" class="whitespace-nowrap">頂点 (p, q)</span>
+            </div>
+            <div id="ghost-legend" class="flex items-center gap-1.5 opacity-0 transition-opacity duration-300">
+              <span class="w-2.5 h-0.5 bg-slate-300 rounded-full flex-shrink-0"></span>
+              <span class="whitespace-nowrap">操作前の位置</span>
+            </div>
+          </div>
+
+          <canvas id="graphCanvas"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+      <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <h2 class="font-bold text-slate-700">数学的ポイントの解説</h2>
+      </div>
+
+      <div class="p-6 grid md:grid-cols-3 gap-6">
+        <div class="explanation-card pl-4">
+          <h3 class="font-bold text-slate-800 mb-2 text-sm">係数 <span class="font-math italic text-blue-600">a</span> の役割</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            グラフの「形」を決定します。<br>
+            <strong class="text-slate-800">絶対値の大きさ</strong>：値が大きいほどグラフは細く（急に）なり、0に近いほど緩やかになります。<br>
+            <strong class="text-slate-800">符号 (+/-)</strong>：プラスなら「右上がり」または「下に凸」、マイナスなら「右下がり」または「上に凸」と向きが逆転します。
+          </p>
+        </div>
+
+        <div class="explanation-card pl-4" style="border-color:#ef4444;">
+          <h3 class="font-bold text-slate-800 mb-2 text-sm">定数 <span class="font-math italic text-red-500">p</span> (x軸方向)</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            グラフを<strong class="text-slate-800">左右に平行移動</strong>します。<br>
+            数式では (x - p) と引き算の形になることに注意！<br>
+            例えば p = 3 のとき、式は (x - 3) となり、グラフは<strong class="text-red-500">右に3</strong>動きます。p = -3 なら左へ動きます。
+          </p>
+        </div>
+
+        <div class="explanation-card pl-4" style="border-color:#16a34a;">
+          <h3 class="font-bold text-slate-800 mb-2 text-sm">定数 <span class="font-math italic text-green-600">q</span> (y軸方向)</h3>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            グラフを<strong class="text-slate-800">上下に平行移動</strong>します。<br>
+            q がプラスなら<strong class="text-green-600">上</strong>へ、マイナスなら下へグラフ全体が移動します。<br>
+            点 (p, q) は、2次関数なら「頂点」、3次関数なら「変曲点」、反比例なら「漸近線の交点（中心）」という重要な位置になります。
+          </p>
+        </div>
+      </div>
+
+      <div class="bg-indigo-50 px-6 py-3 border-t border-indigo-100 text-sm text-indigo-800">
+        <span class="font-bold mr-2">現在の関数:</span>
+        <span id="current-func-desc">2次関数は放物線です。点 (p,q) は「頂点」です。</span>
+      </div>
+    </div>
+
+    <footer class="text-center text-slate-400 text-xs pb-4">
+      <p>© 2024 Math Graph Simulator Ver.2.7</p>
+    </footer>
+  </div>
+
+<script>
+  // --- ユーティリティ ---
+  function gcd(a, b){ return b === 0 ? a : gcd(b, a % b); }
+
+  // --- 状態 ---
+  const state = {
+    mode: 'poly',  // 'poly' | 'inv'
+    power: 2,
+    a: { val: 1, n: 1, d: 1, sign: 1 },
+    p: 0,
+    q: 0
+  };
+
+  // ghost
+  let ghostState = null;
+
+  // --- aリスト（多項式用：分数あり） ---
+  const polyAList = [];
+  const seenValues = new Set();
+
+  for (let i=-5;i<=5;i++){
+    polyAList.push({ val:i, n:Math.abs(i), d:1, sign:i===0?1:Math.sign(i) });
+    seenValues.add(i.toFixed(10));
+  }
+
+  for (let d=2; d<=10; d++){
+    for (let n=1; n<=10; n++){
+      const common=gcd(n,d);
+      const simpleN=n/common, simpleD=d/common;
+      if(simpleD===1) continue;
+      const val=simpleN/simpleD;
+
+      let key=val.toFixed(10);
+      if(!seenValues.has(key)){
+        polyAList.push({ val:val, n:simpleN, d:simpleD, sign:1 });
+        seenValues.add(key);
+      }
+      key=(-val).toFixed(10);
+      if(!seenValues.has(key)){
+        polyAList.push({ val:-val, n:simpleN, d:simpleD, sign:-1 });
+        seenValues.add(key);
+      }
+    }
+  }
+
+  const extraDenominators=[20,30,40,50,100,500,1000];
+  extraDenominators.forEach(d=>{
+    const val=1/d;
+    let key=val.toFixed(10);
+    if(!seenValues.has(key)){
+      polyAList.push({ val:val, n:1, d:d, sign:1 });
+      seenValues.add(key);
+    }
+    key=(-val).toFixed(10);
+    if(!seenValues.has(key)){
+      polyAList.push({ val:-val, n:1, d:d, sign:-1 });
+      seenValues.add(key);
+    }
+  });
+
+  polyAList.sort((a,b)=>a.val-b.val);
+  if(polyAList[0].val > -10) polyAList.unshift({val:-10,n:10,d:1,sign:-1});
+  if(polyAList[polyAList.length-1].val < 10) polyAList.push({val:10,n:10,d:1,sign:1});
+
+  // --- aリスト（反比例用：整数のみ） ---
+  const invAList = [];
+  for (let i=-10;i<=10;i++){
+    invAList.push({ val:i, n:Math.abs(i), d:1, sign:i===0?1:Math.sign(i) });
+  }
+
+  // --- DOM ---
+  const sliderA = document.getElementById('slider-a');
+  const sliderP = document.getElementById('slider-p');
+  const sliderQ = document.getElementById('slider-q');
+
+  const valA = document.getElementById('val-a');
+  const valP = document.getElementById('val-p');
+  const valQ = document.getElementById('val-q');
+
+  const equationDisplay = document.getElementById('equation-display');
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const checkGhost = document.getElementById('check-ghost');
+  const ghostLegend = document.getElementById('ghost-legend');
+
+  const pointLegendLabel = document.getElementById('point-legend-label');
+  const pointLegendRow = document.getElementById('point-legend-row');
+  const currentFuncDesc = document.getElementById('current-func-desc');
+
+  // --- aスライダー（モードで切替） ---
+  function getCurrentAList(){
+    return (state.mode === 'inv') ? invAList : polyAList;
+  }
+
+  function nearestIndex(list, targetVal){
+    let idx=0, minDiff=Infinity;
+    list.forEach((item,i)=>{
+      const diff=Math.abs(item.val - targetVal);
+      if(diff < minDiff){ minDiff=diff; idx=i; }
+    });
+    return idx;
+  }
+
+  function setASliderToValue(targetVal){
+    const list = getCurrentAList();
+    sliderA.min = 0;
+    sliderA.max = list.length - 1;
+    const idx = nearestIndex(list, targetVal);
+    sliderA.value = idx;
+    state.a = list[idx];
+  }
+
+  function syncASliderRangeAndValue(){
+    setASliderToValue(state.a.val);
+  }
+
+  // --- 表示用 ---
+  function formatAPlainText(aObj){
+    // inv は整数しか入らないが、polyでもOK
+    if (aObj.d === 1) return String(aObj.val);
+    const s = aObj.sign < 0 ? '-' : '';
+    return `${s}${aObj.n}/${aObj.d}`;
+  }
+
+  function getSuperscript(n){
+    if(n===1) return '';
+    const superscripts={2:'²',3:'³'};
+    return superscripts[n] || `<sup>${n}</sup>`;
+  }
+
+  // --- 数式HTML ---
+  function generateEquationHTML(){
+    const { mode, power, a, p, q } = state;
+
+    if (a.val === 0) return `y = ${q}`;
+
+    // 反比例：分子は整数、マイナスは棒の外（分母側）へ
+    if (mode === 'inv'){
+      const num = Math.abs(Math.trunc(a.val)); // 整数のみ
+      let denom = (p === 0) ? 'x' : `(x ${p > 0 ? '-' : '+'} ${Math.abs(p)})`;
+
+      if (a.val < 0){
+        // 例：(-5)/x ではなく 5/(-x) 形式
+        denom = (p === 0) ? `-x` : `-${denom}`; // -(x-3) など
+      }
+
+      let html = `y = <div class="fraction">
+                    <span class="fraction-top">${num}</span>
+                    <span class="fraction-bottom">${denom}</span>
+                  </div>`;
+
+      if (q !== 0){
+        const op = q > 0 ? '+' : '-';
+        html += `<span class="operator">${op}</span>${Math.abs(q)}`;
+      }
+      return html;
+    }
+
+    // 多項式
+    let html = `y = `;
+
+    // 係数a（1は省略）
+    let coeffHtml = '';
+    if (a.d === 1){
+      if (Math.abs(a.val) === 1){
+        if (a.val === -1) coeffHtml += '<span class="operator">-</span>';
+      } else {
+        if (a.val < 0) coeffHtml += '<span class="operator">-</span>';
+        coeffHtml += Math.abs(a.n);
+      }
+    } else {
+      const s = a.sign < 0 ? '<span class="operator">-</span>' : '';
+      coeffHtml += `${s}<div class="fraction">
+                      <span class="fraction-top">${a.n}</span>
+                      <span class="fraction-bottom">${a.d}</span>
+                    </div>`;
+    }
+    html += coeffHtml;
+
+    // (x-p)^n
+    let variablePart = '';
+    if (p === 0){
+      variablePart = (power === 1) ? 'x' : `x${getSuperscript(power)}`;
+    } else {
+      const sign = p > 0 ? '-' : '+';
+      variablePart = `(x ${sign} ${Math.abs(p)})${getSuperscript(power)}`;
+    }
+    html += variablePart;
+
+    // +q
+    if (q !== 0){
+      const op = q > 0 ? '+' : '-';
+      html += `<span class="operator">${op}</span>${Math.abs(q)}`;
+    }
+
+    return html;
+  }
+
+  // --- Chart.js ---
+  const ctx = document.getElementById('graphCanvas').getContext('2d');
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label:'操作前',
+          borderColor:'#cbd5e1',
+          borderWidth:2,
+          borderDash:[5,5],
+          pointRadius:0,
+          fill:false,
+          tension:0.4,
+          spanGaps:false,
+          data:[],
+          order:2
+        },
+        {
+          label:'現在のグラフ',
+          borderColor:'#3b82f6',
+          borderWidth:3,
+          pointRadius:0,
+          fill:false,
+          tension:0.4,
+          spanGaps:false,
+          data:[],
+          order:1
+        },
+        {
+          type:'scatter',
+          label:'特徴点',
+          backgroundColor:'#ef4444',
+          borderColor:'#ef4444',
+          borderWidth:0,
+          pointRadius:2,
+          pointHoverRadius:6,
+          data:[],
+          order:0
+        }
+      ]
+    },
+    options: {
+      responsive:true,
+      maintainAspectRatio:false,
+      animation:{ duration:0 },
+      interaction:{ mode:'nearest', intersect:false },
+      layout:{ padding:10 },
+      scales:{
+        x:{
+          type:'linear', min:-10, max:10,
+          grid:{ color:'#f1f5f9' },
+          ticks:{ stepSize:1, autoSkip:false, callback:v=>v===0?'':v, color:'#94a3b8' },
+          border:{ display:false }
+        },
+        y:{
+          type:'linear', min:-10, max:10,
+          grid:{ color:'#f1f5f9' },
+          ticks:{ stepSize:1, callback:v=>v===0?'':v, color:'#94a3b8' },
+          border:{ display:false }
+        }
+      },
+      plugins:{
+        legend:{ display:false },
+        tooltip:{ enabled:false },
+        annotation:{
+          common:{ drawTime:'beforeDatasetsDraw' },
+          annotations:{}
+        }
+      }
+    },
+    plugins:[{
+      id:'axisPlugin',
+      afterDraw:(chart)=>{
+        const {ctx, chartArea:{left,right,top,bottom}, scales:{x,y}} = chart;
+        const zeroX = x.getPixelForValue(0);
+        const zeroY = y.getPixelForValue(0);
+
+        ctx.save();
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#64748b';
+        ctx.fillStyle = '#64748b';
+
+        if (zeroY >= top && zeroY <= bottom){
+          ctx.beginPath(); ctx.moveTo(left, zeroY); ctx.lineTo(right, zeroY); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(right, zeroY);
+          ctx.lineTo(right-5, zeroY-3);
+          ctx.lineTo(right-5, zeroY+3);
+          ctx.closePath(); ctx.fill();
+        }
+        if (zeroX >= left && zeroX <= right){
+          ctx.beginPath(); ctx.moveTo(zeroX, top); ctx.lineTo(zeroX, bottom); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(zeroX, top);
+          ctx.lineTo(zeroX-3, top+5);
+          ctx.lineTo(zeroX+3, top+5);
+          ctx.closePath(); ctx.fill();
         }
 
-        // --- 状態管理 ---
-        const state = {
-            mode: 'poly',   // 'poly' | 'inv'
-            power: 2,       // polyのとき 1/2/3
-            a: { val: 1.0, n: 1, d: 1, sign: 1 },
-            p: 0,
-            q: 0
-        };
-
-        // 比較モード用 (操作開始前の状態を保持)
-        let ghostState = null;
-
-        // --- 係数aのリスト生成 (分数含む) ---
-        const fractionList = [];
-        const seenValues = new Set();
-        // 整数 -5～5
-        for (let i = -5; i <= 5; i++) {
-            fractionList.push({ val: i, n: Math.abs(i), d: 1, sign: i === 0 ? 1 : Math.sign(i) });
-            seenValues.add(i.toFixed(10));
+        if (zeroX>=left && zeroX<=right && zeroY>=top && zeroY<=bottom){
+          ctx.font='12px sans-serif';
+          ctx.fillStyle='#64748b';
+          ctx.fillText('O', zeroX-12, zeroY+14);
         }
 
-        // 分数 (分母2～10)
-        for (let d = 2; d <= 10; d++) {
-            for (let n = 1; n <= 10; n++) {
-                const common = gcd(n, d);
-                const simpleN = n / common;
-                const simpleD = d / common;
-                if (simpleD === 1) continue;
-                const val = simpleN / simpleD;
+        ctx.restore();
+      }
+    }]
+  });
 
-                let key = val.toFixed(10);
-                if (!seenValues.has(key)) {
-                    fractionList.push({ val: val, n: simpleN, d: simpleD, sign: 1 });
-                    seenValues.add(key);
-                }
-                key = (-val).toFixed(10);
-                if (!seenValues.has(key)) {
-                    fractionList.push({ val: -val, n: simpleN, d: simpleD, sign: -1 });
-                    seenValues.add(key);
-                }
-            }
+  // --- 反比例の漸近線（x=p, y=q） ---
+  function updateAsymptotes(){
+    const ann = {};
+    if (state.mode === 'inv'){
+      ann.vLine = { type:'line', xMin:state.p, xMax:state.p, borderColor:'#94a3b8', borderWidth:1, borderDash:[4,4] };
+      ann.hLine = { type:'line', yMin:state.q, yMax:state.q, borderColor:'#94a3b8', borderWidth:1, borderDash:[4,4] };
+    }
+    chart.options.plugins.annotation.annotations = ann;
+  }
+
+  // --- 点計算（端まで途切れないように、yの上限カットをしない） ---
+  function calculatePoints(params){
+    const { mode, power, a, p, q } = params;
+    const data = [];
+
+    // ちょい広めに取る（Chart.jsが描画範囲でクリップ）
+    for (let i=-150;i<=150;i++){
+      const x = i/10;
+
+      if (mode === 'inv'){
+        const dx = x - p;
+        const eps = 0.02; // 漸近線近辺だけ切って、端まで描く
+        if (Math.abs(dx) < eps){
+          data.push({x, y:null});
+          continue;
         }
+        const y = a.val / dx + q;
+        data.push({x, y: (Number.isFinite(y) ? y : null)});
+        continue;
+      }
 
-        // 追加: 1/20, 1/30, 1/40, 1/50, 1/100, 1/500, 1/1000 とそのマイナス
-        const extraDenominators = [20, 30, 40, 50, 100, 500, 1000];
-        extraDenominators.forEach(d => {
-            const val = 1 / d;
-            let key = val.toFixed(10);
-            if (!seenValues.has(key)) {
-                fractionList.push({ val: val, n: 1, d: d, sign: 1 });
-                seenValues.add(key);
-            }
-            key = (-val).toFixed(10);
-            if (!seenValues.has(key)) {
-                fractionList.push({ val: -val, n: 1, d: d, sign: -1 });
-                seenValues.add(key);
-            }
-        });
+      const y = a.val * Math.pow((x - p), power) + q;
+      // 無限大級だけ避ける（基本は途切れさせない）
+      data.push({x, y: (Number.isFinite(y) && Math.abs(y) < 1e6) ? y : null});
+    }
 
-        // ソートして、-10と10を範囲端として追加
-        fractionList.sort((a, b) => a.val - b.val);
-        if (fractionList[0].val > -10) fractionList.unshift({val: -10, n: 10, d: 1, sign: -1});
-        if (fractionList[fractionList.length-1].val < 10) fractionList.push({val: 10, n: 10, d: 1, sign: 1});
+    return data;
+  }
 
-        // --- DOM要素 ---
-        const sliderA = document.getElementById('slider-a');
-        const sliderP = document.getElementById('slider-p');
-        const sliderQ = document.getElementById('slider-q');
-        const valA = document.getElementById('val-a');
-        const valP = document.getElementById('val-p');
-        const valQ = document.getElementById('val-q');
-        const equationDisplay = document.getElementById('equation-display');
-        const tabBtns = document.querySelectorAll('.tab-btn');
-        const checkGhost = document.getElementById('check-ghost');
-        const ghostLegend = document.getElementById('ghost-legend');
-        const pointLegendLabel = document.getElementById('point-legend-label');
-        const pointLegendRow = document.getElementById('point-legend-row');
-        const currentFuncDesc = document.getElementById('current-func-desc');
+  // --- 更新 ---
+  function update(){
+    // a はモード別リストから読む
+    const list = getCurrentAList();
+    const idxA = parseInt(sliderA.value);
+    state.a = list[Math.max(0, Math.min(list.length-1, idxA))];
 
-        // --- スライダー初期化 (aのみリスト依存) ---
-        function initASlider() {
-            sliderA.min = 0;
-            sliderA.max = fractionList.length - 1;
-            setSliderAValue(1); // 初期値 1
-        }
+    state.p = parseInt(sliderP.value);
+    state.q = parseInt(sliderQ.value);
 
-        function setSliderAValue(targetVal) {
-            let minDiff = Infinity;
-            let idx = 0;
-            fractionList.forEach((item, i) => {
-                const diff = Math.abs(item.val - targetVal);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    idx = i;
-                }
-            });
-            sliderA.value = idx;
-            state.a = fractionList[idx];
-        }
+    // 表示
+    valA.textContent = (state.mode === 'inv') ? String(Math.trunc(state.a.val)) : formatAPlainText(state.a);
+    valP.textContent = state.p;
+    valQ.textContent = state.q;
 
-        // --- Chart.js 初期化 ---
-        const ctx = document.getElementById('graphCanvas').getContext('2d');
+    equationDisplay.innerHTML = generateEquationHTML();
 
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                datasets: [
-                    // 1. Ghost Graph (比較用)
-                    {
-                        label: '操作前',
-                        borderColor: '#cbd5e1',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 0,
-                        fill: false,
-                        tension: 0.4,
-                        spanGaps: false,
-                        data: [],
-                        order: 2
-                    },
-                    // 2. Main Graph (現在)
-                    {
-                        label: '現在のグラフ',
-                        borderColor: '#3b82f6',
-                        borderWidth: 3,
-                        pointRadius: 0,
-                        fill: false,
-                        tension: 0.4,
-                        spanGaps: false,
-                        data: [],
-                        order: 1
-                    },
-                    // 3. Point (特徴点)
-                    {
-                        type: 'scatter',
-                        label: '特徴点',
-                        backgroundColor: '#ef4444',
-                        borderColor: '#ef4444',
-                        borderWidth: 0,
-                        pointRadius: 2,
-                        pointHoverRadius: 6,
-                        data: [],
-                        order: 0
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                animation: { duration: 0 },
-                interaction: { mode: 'nearest', intersect: false },
-                layout: { padding: 10 },
-                scales: {
-                    x: {
-                        type: 'linear', min: -10, max: 10,
-                        grid: { color: '#f1f5f9' },
-                        ticks: {
-                            stepSize: 1,
-                            autoSkip: false,
-                            callback: v => v===0?'':v,
-                            color: '#94a3b8'
-                        },
-                        border: { display: false }
-                    },
-                    y: {
-                        type: 'linear', min: -10, max: 10,
-                        grid: { color: '#f1f5f9' },
-                        ticks: { stepSize: 1, callback: v => v===0?'':v, color: '#94a3b8' },
-                        border: { display: false }
-                    }
-                },
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: false },
-                    annotation: {
-                        common: { drawTime: 'beforeDatasetsDraw' },
-                        annotations: {}
-                    }
-                }
-            },
-            plugins: [{
-                id: 'axisPlugin',
-                afterDraw: (chart) => {
-                    const {ctx, chartArea: {left, right, top, bottom}, scales: {x, y}} = chart;
-                    const zeroX = x.getPixelForValue(0);
-                    const zeroY = y.getPixelForValue(0);
+    // 反比例はtension 0（妙な曲がりを避ける）
+    const t = (state.mode === 'inv') ? 0 : 0.4;
+    chart.data.datasets[1].tension = t;
+    chart.data.datasets[0].tension = t;
 
-                    ctx.save();
-                    ctx.lineWidth = 1;
-                    ctx.strokeStyle = '#64748b';
-                    ctx.fillStyle = '#64748b';
+    updateAsymptotes();
 
-                    // X軸
-                    if (zeroY >= top && zeroY <= bottom) {
-                        ctx.beginPath(); ctx.moveTo(left, zeroY); ctx.lineTo(right, zeroY); ctx.stroke();
-                        // 矢印
-                        ctx.beginPath();
-                        ctx.moveTo(right, zeroY);
-                        ctx.lineTo(right-5, zeroY-3);
-                        ctx.lineTo(right-5, zeroY+3);
-                        ctx.closePath();
-                        ctx.fill();
-                    }
-                    // Y軸
-                    if (zeroX >= left && zeroX <= right) {
-                        ctx.beginPath(); ctx.moveTo(zeroX, top); ctx.lineTo(zeroX, bottom); ctx.stroke();
-                        // 矢印
-                        ctx.beginPath();
-                        ctx.moveTo(zeroX, top);
-                        ctx.lineTo(zeroX-3, top+5);
-                        ctx.lineTo(zeroX+3, top+5);
-                        ctx.closePath();
-                        ctx.fill();
-                    }
+    // main
+    chart.data.datasets[1].data = calculatePoints(state);
 
-                    // 原点Oの表示
-                    if (zeroX >= left && zeroX <= right && zeroY >= top && zeroY <= bottom) {
-                        ctx.font = '12px sans-serif';
-                        ctx.fillStyle = '#64748b';
-                        ctx.fillText("O", zeroX - 12, zeroY + 14);
-                    }
+    // point (p,q)
+    if (state.mode === 'poly' && state.power === 1){
+      chart.data.datasets[2].data = [];
+    } else {
+      chart.data.datasets[2].data = [{x: state.p, y: state.q}];
+    }
 
-                    ctx.restore();
-                }
-            }]
-        });
+    // ghost
+    if (ghostState && checkGhost.checked){
+      chart.data.datasets[0].data = calculatePoints(ghostState);
+      ghostLegend.style.opacity = '1';
+    } else {
+      chart.data.datasets[0].data = [];
+      ghostLegend.style.opacity = '0';
+    }
 
-        // --- 数式表示補助 ---
-        function formatAPlainText(aObj) {
-            if (aObj.d === 1) return String(aObj.val);
-            const s = aObj.sign < 0 ? '-' : '';
-            return `${s}${aObj.n}/${aObj.d}`;
-        }
+    chart.update();
+  }
 
-        // --- 数式HTML生成 ---
-        function generateEquationHTML() {
-            const { mode, power, a, p, q } = state;
+  function handleDragStart(){
+    if (!checkGhost.checked) return;
+    ghostState = JSON.parse(JSON.stringify(state));
+  }
+  function handleDragEnd(){
+    ghostState = null;
+    update();
+  }
 
-            // a=0 の場合（どちらも y = q）
-            if (a.val === 0) return `y = ${q}`;
+  // --- 関数切り替え ---
+  function setFunction(key){
+    if (key === 'inv'){
+      state.mode = 'inv';
+    } else {
+      state.mode = 'poly';
+      state.power = key;
+    }
 
-            // 反比例
-            if (mode === 'inv') {
-                const num = formatAPlainText(a); // 1の省略はしない
-                const denom = (p === 0) ? 'x' : `(x ${p > 0 ? '-' : '+'} ${Math.abs(p)})`;
-                let html = `y = <div class="fraction">
-                              <span class="fraction-top">${num}</span>
-                              <span class="fraction-bottom">${denom}</span>
-                            </div>`;
-                if (q !== 0) {
-                    const op = q > 0 ? '+' : '-';
-                    html += `<span class="operator">${op}</span>${Math.abs(q)}`;
-                }
-                return html;
-            }
+    // タブUI
+    tabBtns.forEach(btn=>{
+      const k = btn.dataset.key;
+      const activeKey = (state.mode === 'inv') ? 'inv' : `poly${state.power}`;
+      if (k === activeKey){
+        btn.classList.add('active','bg-blue-600','text-white','border-blue-600','shadow-md');
+        btn.classList.remove('bg-white','text-slate-600');
+      } else {
+        btn.classList.remove('active','bg-blue-600','text-white','border-blue-600','shadow-md');
+        btn.classList.add('bg-white','text-slate-600');
+      }
+    });
 
-            // 多項式 (1/2/3次)
-            let html = `y = `;
+    updateDescription();
 
-            // --- 係数 a の表示（1は省略） ---
-            let coeffHtml = '';
-            if (a.d === 1) {
-                if (Math.abs(a.val) === 1) {
-                    if (a.val === -1) coeffHtml += '<span class="operator">-</span>';
-                } else {
-                    if (a.val < 0) coeffHtml += '<span class="operator">-</span>';
-                    coeffHtml += Math.abs(a.n);
-                }
-            } else {
-                const s = a.sign < 0 ? '<span class="operator">-</span>' : '';
-                coeffHtml += `${s}<div class="fraction">
-                                <span class="fraction-top">${a.n}</span>
-                                <span class="fraction-bottom">${a.d}</span>
-                             </div>`;
-            }
-            html += coeffHtml;
+    // ★ここでaスライダーの中身をモードに合わせて切替（反比例は整数のみ）
+    syncASliderRangeAndValue();
 
-            // --- 変数部分 (x-p)^n ---
-            let variablePart = '';
-            if (p === 0) {
-                if (power === 1) variablePart = 'x';
-                else variablePart = `x${getSuperscript(power)}`;
-            } else {
-                const sign = p > 0 ? '-' : '+';
-                variablePart = `(x ${sign} ${Math.abs(p)})${getSuperscript(power)}`;
-            }
-            html += variablePart;
+    update();
+  }
 
-            // --- 切片 q ---
-            if (q !== 0) {
-                const op = q > 0 ? '+' : '-';
-                html += `<span class="operator">${op}</span>${Math.abs(q)}`;
-            }
+  function updateDescription(){
+    if (state.mode === 'inv'){
+      currentFuncDesc.textContent = "反比例（分数関数）は双曲線のグラフです。点 (p,q) は2本の漸近線の交点（中心）です。";
+      pointLegendLabel.textContent = "交点 (p, q)";
+      pointLegendRow.style.display = 'flex';
+      return;
+    }
 
-            return html;
-        }
+    const descs = {
+      1:"1次関数は直線のグラフです。係数 a は「傾き」を表します。",
+      2:"2次関数は放物線です。点 (p,q) は「頂点」と呼ばれ、グラフの折り返し地点になります。",
+      3:"3次関数はS字のような曲線です。点 (p,q) は「変曲点」となり、グラフの曲がり方が変わる中心点です。"
+    };
+    currentFuncDesc.textContent = descs[state.power];
 
-        function getSuperscript(n) {
-            if (n === 1) return '';
-            const superscripts = {2:'²', 3:'³'};
-            return superscripts[n] || `<sup>${n}</sup>`;
-        }
+    const pointLabels = {1:"通過点 (p, q)", 2:"頂点 (p, q)", 3:"変曲点 (p, q)"};
+    pointLegendLabel.textContent = pointLabels[state.power];
 
-        // --- グラフ計算 ---
-        function calculatePoints(params) {
-            const { mode, power, a, p, q } = params;
-            const data = [];
+    pointLegendRow.style.display = (state.power === 1) ? 'none' : 'flex';
+  }
 
-            for (let i = -150; i <= 150; i++) {
-                const x = i / 10;
+  function resetParams(){
+    // どのモードでも「a=1」に近い値へ
+    setASliderToValue(1);
+    sliderP.value = 0;
+    sliderQ.value = 0;
+    update();
+  }
 
-                if (mode === 'inv') {
-                    const dx = x - p;
-                    // 漸近線付近で線が繋がらないように切る（nullで折る）
-                    if (Math.abs(dx) < 0.05) {
-                        data.push({x, y: null});
-                        continue;
-                    }
-                    const y = a.val / dx + q;
-                    if (Math.abs(y) < 200) data.push({x, y});
-                    else data.push({x, y: null});
-                    continue;
-                }
+  // --- イベント ---
+  [sliderA, sliderP, sliderQ].forEach(s=>{
+    s.addEventListener('input', ()=>update());
+    s.addEventListener('mousedown', handleDragStart);
+    s.addEventListener('mouseup', handleDragEnd);
+    s.addEventListener('touchstart', handleDragStart, {passive:true});
+    s.addEventListener('touchend', handleDragEnd);
+  });
 
-                const y = a.val * Math.pow((x - p), power) + q;
-                if (Math.abs(y) < 200) data.push({x, y});
-            }
-            return data;
-        }
+  checkGhost.addEventListener('change', ()=>{
+    if (!checkGhost.checked){
+      ghostState = null;
+      update();
+    }
+  });
 
-        // --- 注釈（反比例の漸近線） ---
-        function updateAsymptotes() {
-            const ann = {};
-            if (state.mode === 'inv') {
-                ann.vLine = {
-                    type: 'line',
-                    xMin: state.p,
-                    xMax: state.p,
-                    borderColor: '#94a3b8',
-                    borderWidth: 1,
-                    borderDash: [4, 4]
-                };
-                ann.hLine = {
-                    type: 'line',
-                    yMin: state.q,
-                    yMax: state.q,
-                    borderColor: '#94a3b8',
-                    borderWidth: 1,
-                    borderDash: [4, 4]
-                };
-            }
-            chart.options.plugins.annotation.annotations = ann;
-        }
-
-        // --- 更新処理 ---
-        function update() {
-            const idxA = parseInt(sliderA.value);
-            state.a = fractionList[idxA];
-            state.p = parseInt(sliderP.value);
-            state.q = parseInt(sliderQ.value);
-
-            // 値表示
-            valA.textContent = formatAPlainText(state.a);
-            valP.textContent = state.p;
-            valQ.textContent = state.q;
-
-            // 数式
-            equationDisplay.innerHTML = generateEquationHTML();
-
-            // 曲線の滑らかさ（反比例は0で繋がりを抑える）
-            const t = (state.mode === 'inv') ? 0 : 0.4;
-            chart.data.datasets[1].tension = t;
-            chart.data.datasets[0].tension = t;
-
-            // 注釈更新（反比例）
-            updateAsymptotes();
-
-            // 1. メイングラフ
-            chart.data.datasets[1].data = calculatePoints(state);
-
-            // 2. 特徴点
-            if (state.mode === 'poly' && state.power === 1) {
-                chart.data.datasets[2].data = [];
-            } else {
-                // 2次/3次/反比例は (p,q) を表示
-                chart.data.datasets[2].data = [{x: state.p, y: state.q}];
-            }
-
-            // 3. Ghostグラフ
-            if (ghostState && checkGhost.checked) {
-                chart.data.datasets[0].data = calculatePoints(ghostState);
-                ghostLegend.style.opacity = '1';
-            } else {
-                chart.data.datasets[0].data = [];
-                ghostLegend.style.opacity = '0';
-            }
-
-            chart.update();
-        }
-
-        // --- ゴースト機能（操作開始/終了） ---
-        function handleDragStart() {
-            if (!checkGhost.checked) return;
-            ghostState = JSON.parse(JSON.stringify(state));
-        }
-
-        function handleDragEnd() {
-            ghostState = null;
-            update();
-        }
-
-        // --- 関数切り替え ---
-        function setFunction(key) {
-            if (key === 'inv') {
-                state.mode = 'inv';
-            } else {
-                state.mode = 'poly';
-                state.power = key;
-            }
-
-            // タブUI更新
-            tabBtns.forEach(btn => {
-                const k = btn.dataset.key;
-                const activeKey = (state.mode === 'inv') ? 'inv' : `poly${state.power}`;
-                if (k === activeKey) {
-                    btn.classList.add('active', 'bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
-                    btn.classList.remove('bg-white', 'text-slate-600');
-                } else {
-                    btn.classList.remove('active', 'bg-blue-600', 'text-white', 'border-blue-600', 'shadow-md');
-                    btn.classList.add('bg-white', 'text-slate-600');
-                }
-            });
-
-            updateDescription();
-            update();
-        }
-
-        function updateDescription() {
-            if (state.mode === 'inv') {
-                currentFuncDesc.textContent = "反比例（分数関数）は双曲線のグラフです。点 (p,q) は2本の漸近線の交点（中心）です。";
-                pointLegendLabel.textContent = "交点 (p, q)";
-                pointLegendRow.style.display = 'flex';
-                return;
-            }
-
-            const descs = {
-                1: "1次関数は直線のグラフです。係数 a は「傾き」を表します。",
-                2: "2次関数は放物線です。点 (p,q) は「頂点」と呼ばれ、グラフの折り返し地点になります。",
-                3: "3次関数はS字のような曲線です。点 (p,q) は「変曲点」となり、グラフの曲がり方が変わる中心点です。"
-            };
-            currentFuncDesc.textContent = descs[state.power];
-
-            const pointLabels = {
-                1: "通過点 (p, q)",
-                2: "頂点 (p, q)",
-                3: "変曲点 (p, q)"
-            };
-            pointLegendLabel.textContent = pointLabels[state.power];
-
-            if (state.power === 1) {
-                pointLegendRow.style.display = 'none';
-            } else {
-                pointLegendRow.style.display = 'flex';
-            }
-        }
-
-        function resetParams() {
-            setSliderAValue(1);
-            sliderP.value = 0;
-            sliderQ.value = 0;
-            update();
-        }
-
-        // --- イベントリスナー登録 ---
-        const sliders = [sliderA, sliderP, sliderQ];
-        sliders.forEach(s => {
-            s.addEventListener('input', () => update());
-            s.addEventListener('mousedown', handleDragStart);
-            s.addEventListener('mouseup', handleDragEnd);
-            s.addEventListener('touchstart', handleDragStart, {passive: true});
-            s.addEventListener('touchend', handleDragEnd);
-        });
-
-        checkGhost.addEventListener('change', () => {
-            if (!checkGhost.checked) {
-                ghostState = null;
-                update();
-            }
-        });
-
-        // 初期化
-        initASlider();
-        setFunction(2); // デフォルトは2次
-    </script>
+  // 初期化
+  // 最初はpoly(2次)なので polyAList でaスライダー作成
+  setASliderToValue(1);
+  setFunction(2);
+</script>
 </body>
 </html>
